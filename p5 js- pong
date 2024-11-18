@@ -1,0 +1,173 @@
+# p5js<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/addons/p5.sound.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="utf-8" />
+
+  </head>
+  <body>
+      <main> 
+    </main> 
+   <script src="sketch.js"></script>
+   <script src="p5.collide2d.js"></script>
+  </body>
+  </html>
+let colidiu = false;//variavel de colisão
+
+//variaveis da bolinha
+let xBolinha = 300;// variavel para posição x da bolinha
+let yBolinha = 200;// variavel para posição y da bolinha 
+let diametro = 15;// variavel para o diametro da bolinha
+let raio = diametro / 2;// variavel raio = metade do diametro
+
+let velocidadeXBolinha = 6;// variavel de movimento no eixo x
+let velocidadeYBolinha = 6;// variavel de movimento no eixo y
+
+//variaveis da raquete
+let xRaquete = 5;// variavel para posição x da raquete
+let yRaquete = 150;//variavel para posição y da raquete
+let raqueteComprimento = 10;//variavel para o comprimento da raquete
+let raqueteAltura = 90;// variavel para a altura da raquete
+
+//variaveis da raquete do oponente
+let xRaqueteOponente = 585;//variavel para a posição x da raquete do oponente
+let yRaqueteOponente = 150;//variavel para a posição y da raquete do oponente
+let velocidadeYOponente;//variavel para a velocidade y da raquete do oponente
+
+//variaveis dos pontos
+let meusPontos = 0;//variavel para os meus pontos
+let pontosDoOponente = 0;//variavel para os pontos do oponente
+
+//variaveis dos sons
+let raquetada;//variavel do som da raquetada
+let ponto;//variavel do som dos pontos
+let trilha;//variavel da trilha sonora do jogo
+    
+
+function setup() {// funçaõ para criar
+  createCanvas(600, 400);// cria um fundo para o jogo
+   trilha.loop();//faz com que a trilha sonora toque
+}
+
+function draw() {//função para desenhar
+  background(0);// cor do fundo do jogo
+  mostraBolinha();// mostra a bolinha
+  movimentaBolinha();// movimento da bolinha
+  verificaColisaoBorda();// colisão da bolinha com a borda
+  mostraRaquete(xRaquete, yRaquete);//mostra a minha raquete
+  movimentaMinhaRaquete(xRaquete, yRaquete);//movimenta a minha raquete
+  verificaColisaoRaquete(xRaquete, yRaquete);//verifica a colisão da raquete com a bolinha
+  mostraRaquete(xRaqueteOponente, yRaqueteOponente);//mostra a raquete do oponente
+  movimentaRaqueteOponente();//movimenta a raquete do oponente
+  verificaColisaoRaquete(xRaqueteOponente, yRaqueteOponente);//verifica a colisão da raquete do oponente com a bolinha
+  incluiPlacar();// inclui o placar do jogo
+  marcaPonto();//marca os pontos do jogo
+}
+  
+function mostraBolinha(){//desenho da bolinha
+  circle(xBolinha, yBolinha, diametro);// cria o circulo, a posição dela e o tamanho
+}
+ 
+function movimentaBolinha() {//movinto da bolinha
+  xBolinha += velocidadeXBolinha;// soma posição x com a velocidade x
+  yBolinha += velocidadeYBolinha;// soma posição y com a velocidade y
+}
+ 
+function verificaColisaoBorda() {// verifica a colisão da bolinha com a borda
+  if (xBolinha + raio > width || xBolinha - raio < 0){// se bolinha tocar na borda volte 
+    velocidadeXBolinha *= -1;// subtrai -1 na velocidadeXBolinha
+  }
+  
+  if (yBolinha + raio > height || yBolinha - raio < 0){// se bolinha tocar na borda volte
+    velocidadeYBolinha *= -1;// sutrai -1 na velocidadeYBolinha
+  }
+}
+
+function mostraRaquete(x, y){// cria raquete
+  rect(x, y, raqueteComprimento, raqueteAltura); 
+  // forma da raquete, comprimento, altura
+}
+
+function movimentaMinhaRaquete(){//movimento da minha raquete
+  if (keyIsDown( UP_ARROW )){//se a tecla para cima for precionada
+     yRaquete -= 10;//yRaquete sobe 
+  }
+  
+  if (keyIsDown( DOWN_ARROW )){//se a tecla para baixo for precionada
+     yRaquete += 10;//yRaquete desce
+  }
+}
+
+function verificaColisaoRaquete(){//verifica a colisão da raquete com a bolinha
+  if (xBolinha - raio < xRaquete + raqueteComprimento 
+      && yBolinha - raio < yRaquete + raqueteAltura
+      && yBolinha + raio > yRaquete) {//se xBolinha menos raio for menor que posição x da raquete mais o comprimento dela e se yBolinha menos raio for menor que posição y da raquete mais sua altura e se yBolinha  mais raiovfor maior que a posição y da raquete
+    velocidadeXBolinha *= -1;// então velocidade x da bolinha diminui 1
+    raquetada.play();//tocar raquetada ao aconter isso
+  }
+}
+
+function verificaColisaoRaquete(x, y){//verifica a colisão da bolinha com a raquete
+  colidiu = collideRectCircle(x, y, raqueteComprimento, raqueteAltura, xBolinha, yBolinha, raio);//colidiu é equivalente a collideRectCircle, X  e y, comprimento da raquete e sua altura, mais a posições X e y da bolinha e seu raio
+  if (colidiu){//se a bolinha colidir com a raquete
+    velocidadeXBolinha *= -1;// velocidade da bolinha fica *= -1
+    raquetada.play();//tocar  a trilha sonora raquetada
+    }
+  }
+
+
+function mostraRaqueteOponente(x, y){//desenha a raquete do oponente
+  rect(x, y, raqueteComprimento, raqueteAltura);//caracteristicas da raquete, comprimento, altura
+}
+
+function movimentaRaqueteOponente(){// movimento da raquete do oponente
+ if (keyIsDown(87)){//se a tecla w for presionada
+        yRaqueteOponente -= 10;//mova raquete do oponente para cima
+    }
+    if (keyIsDown(83)){//se a tecla s for clicada
+        yRaqueteOponente += 10;//mova a raquete do oponente para baixo
+    }
+
+}
+
+
+function incluiPlacar(){//faz um placar 
+  stroke(255);//contorno dos "personagens", na cor branca
+  textAlign(CENTER);// determina a posição do texto
+  textSize(16);//determina o tamanho da letra, 16
+  fill(color(255, 140, 0));// determina a cor do placar
+  rect(150, 10, 40, 20);//tamanho e posição do retangulo
+  fill(255);//cor é determinada 
+  text(meusPontos, 170, 26);//posição, tamanho do texto do placar 
+  fill(color(255, 140, 0));//determina a cor do outro placar
+  rect(450, 10, 40, 20);//tamanho e posição do retangulo
+  fill(255);//cor é determinada
+  text(pontosDoOponente, 470, 26);//posição, tamanho do texto do placar
+}
+
+function marcaPonto(){// marca os pontos da partida
+  if(xBolinha > 590){//se posição x da bolinha for maior que 590
+    meusPontos += 1;//então adicione um aos meus pontos
+    ponto.play();//tocar o som ponto
+  }
+  if(xBolinha < 10){//se posição x da bolinha for menor que 10
+    pontosDoOponente += 1;//então adicione um aos pontos do oponente
+    ponto.play();//tocar o som ponto
+  }
+}
+
+function preload() {// função dos sons 
+    trilha = loadSound("trilha.mp3");// trilha é equivalente a "trilha.mp3"
+    ponto = loadSound("ponto.mp3");//ponto é equivalente a "ponto.mp3"
+    raquetada = loadSound("raquetada.mp3");//raquetada é equivalente a "raquetada.mp3"
+}
+function bolinhaNaoFicaPresa(){//caso a bolinha fique presa a função concerta o bug
+    if (xBolinha + raio < 0){//se posição x da bolinha mais raio for menor que 0
+    console.log('bolinha ficou presa');//alerte "bolinha ficou presa"
+    xBolinha = 300;// posição x da bolinha = 300
+    }
+}
+
+
